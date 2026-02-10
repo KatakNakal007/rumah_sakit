@@ -1,4 +1,4 @@
-@extends('layouts.app')
+{{-- @extends('layouts.app')
 
 @section('content')
     <div class="container">
@@ -83,27 +83,6 @@
         @if ($appointments->isEmpty())
             <p class="text-muted">Belum ada janji temu.</p>
         @else
-            {{-- <form action="{{ route('appointments.index') }}" method="GET" class="mb-3">
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <input type="date" name="date" class="form-control" value="{{ request('date') }}">
-                    </div>
-                    <div class="col-md-4">
-                        <select name="status" class="form-control">
-                            <option value="">-- Semua Status --</option>
-                            <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu
-                            </option>
-                            <option value="diproses" {{ request('status') == 'diproses' ? 'selected' : '' }}>Diproses
-                            </option>
-                            <option value="selesai" {{ request('status') == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                            <option value="batal" {{ request('status') == 'batal' ? 'selected' : '' }}>Batal</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-outline-primary w-100" type="submit">Filter</button>
-                    </div>
-                </div>
-            </form> --}}
             <form method="GET" action="{{ route('appointments.index') }}" class="row g-2 mb-3">
                 <div class="col-md-3">
                     <input type="date" name="date" value="{{ $date }}" class="form-control"
@@ -159,35 +138,7 @@
                                 {{ $appointment->schedule->end_time ?? '-' }}
                             </td>
                             <td>{{ $appointment->appointment_date }}</td>
-                            {{-- <td>{{ ucfirst($appointment->status) }}</td> --}}
-                            {{-- <td>
-                                @php
-                                    $status = $appointment->status;
-                                    $badgeClass = match ($status) {
-                                        'menunggu' => 'warning',
-                                        'selesai' => 'success',
-                                        'batal' => 'danger',
-                                        default => 'secondary',
-                                    };
-                                @endphp
-
-                                <span class="badge bg-{{ $badgeClass }}">
-                                    {{ ucfirst($status) }}
-                                </span>
-                            </td> --}}
                             <td>
-                                {{-- <form action="{{ route('appointments.update', $appointment->id) }}" method="POST">
-                                    @csrf @method('PUT')
-
-                                    <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                        <option value="menunggu"
-                                            {{ $appointment->status == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                                        <option value="dipanggil"
-                                            {{ $appointment->status == 'dipanggil' ? 'selected' : '' }}>Dipanggil</option>
-                                        <option value="selesai" {{ $appointment->status == 'selesai' ? 'selected' : '' }}>
-                                            Selesai</option>
-                                    </select>
-                                </form> --}}
                                 @if ($appointment->queue)
                                     @if ($appointment->queue->called == 2)
                                         <span class="badge bg-success">Sudah Selesai Diperiksa</span>
@@ -218,82 +169,6 @@
                             </td>
                         </tr>
                     @endforeach
-                    {{-- <canvas id="grafikJanjiTemu"></canvas>
-                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                    <script>
-                        const ctx = document.getElementById('grafikJanjiTemu').getContext('2d');
-                        const chart = new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: {!! json_encode($dailyCounts->pluck('date')) !!},
-                                datasets: [{
-                                    label: 'Jumlah Janji Temu',
-                                    data: {!! json_encode($dailyCounts->pluck('total')) !!},
-                                    backgroundColor: '#4faaf0'
-                                }]
-                            }
-                        });
-                    </script> --}}
-                    {{-- <canvas id="grafikPerDokter"></canvas>
-                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                    <script>
-                        const ctx = document.getElementById('grafikPerDokter').getContext('2d');
-                        const chart = new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: {!! json_encode($perDokterChart->pluck('doctor.name')) !!},
-                                datasets: [{
-                                    label: 'Jumlah Janji Temu',
-                                    data: {!! json_encode($perDokterChart->pluck('total')) !!},
-                                    backgroundColor: '#4faaf0'
-                                }]
-                            }
-                        });
-                    </script> --}}
-
-                    {{-- <canvas id="grafikDokter" width="600" height="400"></canvas>
-
-                    <button onclick="exportToPdf()" class="btn btn-primary mt-3">Export Grafik ke PDF</button>
-
-                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                    <script>
-                        const ctx = document.getElementById('grafikDokter').getContext('2d');
-                        const chart = new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: {!! json_encode($labels) !!},
-                                datasets: [{
-                                    label: 'Jumlah Janji Temu',
-                                    data: {!! json_encode($data) !!},
-                                    backgroundColor: '#4faaf0'
-                                }]
-                            }
-                        });
-
-                        function exportToPdf() {
-                            const canvas = document.getElementById('grafikDokter');
-                            const imageData = canvas.toDataURL('image/png');
-
-                            fetch("{{ route('appointments.exportChartImage') }}", {
-                                    method: "POST",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                                    },
-                                    body: JSON.stringify({
-                                        image: imageData
-                                    })
-                                })
-                                .then(response => response.blob())
-                                .then(blob => {
-                                    const url = window.URL.createObjectURL(blob);
-                                    const a = document.createElement('a');
-                                    a.href = url;
-                                    a.download = "grafik-janji-temu.pdf";
-                                    a.click();
-                                });
-                        }
-                    </script> --}}
 
                     <div class="chart-wrapper">
                         <canvas id="grafikDokter" width="600" height="400"></canvas>
@@ -354,35 +229,6 @@
                         }
                     </script>
 
-                    {{-- <canvas id="grafikDokter"></canvas>
-                    <canvas id="grafikStatus" class="mt-5"></canvas>
-
-                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                    <script>
-                        new Chart(document.getElementById('grafikDokter'), {
-                            type: 'bar',
-                            data: {
-                                labels: {!! json_encode($perDokter->pluck('doctor.name')) !!},
-                                datasets: [{
-                                    label: 'Jumlah Janji Temu',
-                                    data: {!! json_encode($perDokter->pluck('total')) !!},
-                                    backgroundColor: '#4faaf0'
-                                }]
-                            }
-                        });
-
-                        new Chart(document.getElementById('grafikStatus'), {
-                            type: 'bar',
-                            data: {
-                                labels: {!! json_encode($statusCounts->keys()) !!},
-                                datasets: [{
-                                    label: 'Distribusi Status',
-                                    data: {!! json_encode($statusCounts->values()) !!},
-                                    backgroundColor: '#f4af40'
-                                }]
-                            }
-                        });
-                    </script> --}}
                 </tbody>
             </table>
             <div class="d-flex justify-content-center mt-3">
@@ -390,4 +236,303 @@
             </div>
         @endif
     </div>
-@endsection
+@endsection --}}
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            {{ __('Daftar Janji Temu') }}
+        </h2>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-900 dark:text-gray-100">
+
+                <!-- Tombol buat janji temu -->
+                <a href="{{ route('appointments.create') }}"
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-3 inline-block">
+                    Buat Janji Temu
+                </a>
+
+                <!-- Pesan sukses -->
+                @if (session('success'))
+                    <div class="bg-green-500 text-white p-2 rounded mb-3">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                <!-- Antrian hari ini -->
+                @if ($todayAppointments->count())
+                    <div class="mb-6">
+                        <div class="bg-blue-500 text-white px-4 py-2 rounded-t">
+                            <strong>Antrian Janji Temu Hari Ini
+                                ({{ \Carbon\Carbon::today()->format('d M Y') }})</strong>
+                        </div>
+                        <div class="border border-gray-300 rounded-b overflow-hidden">
+                            <table class="table-auto w-full border-collapse">
+                                <thead class="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="border px-4 py-2">Pasien</th>
+                                        <th class="border px-4 py-2">Dokter</th>
+                                        <th class="border px-4 py-2">Spesialis</th>
+                                        <th class="border px-4 py-2">Jadwal</th>
+                                        <th class="border px-4 py-2">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($todayAppointments as $appt)
+                                        <tr>
+                                            <td class="border px-4 py-2">{{ $appt->patient->name }}</td>
+                                            <td class="border px-4 py-2">{{ $appt->doctor->name }}</td>
+                                            <td class="border px-4 py-2">{{ $appt->doctor->specialization }}</td>
+                                            <td class="border px-4 py-2">
+                                                {{ $appt->schedule->day }} ({{ $appt->schedule->start_time }} -
+                                                {{ $appt->schedule->end_time }})
+                                            </td>
+                                            <td class="border px-4 py-2">
+                                                @php
+                                                    $statusColors = [
+                                                        'menunggu' => 'bg-yellow-500 text-white',
+                                                        'dipanggil' => 'bg-blue-500 text-white',
+                                                        'selesai' => 'bg-green-500 text-white',
+                                                        'batal' => 'bg-red-500 text-white',
+                                                    ];
+                                                @endphp
+                                                <span
+                                                    class="px-2 py-1 rounded text-xs font-semibold {{ $statusColors[$appt->status] ?? 'bg-gray-500 text-white' }}">
+                                                    {{ ucfirst($appt->status) }}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Total antrian per dokter -->
+                @if ($antrianPerDokter->count())
+                    <div class="mb-6">
+                        <div class="bg-gray-600 text-white px-4 py-2 rounded-t">
+                            <strong>Total Antrian Hari Ini per Dokter</strong>
+                        </div>
+                        <div class="border border-gray-300 rounded-b overflow-hidden">
+                            <table class="table-auto w-full border-collapse">
+                                <thead class="bg-gray-100 dark:bg-gray-700">
+                                    <tr>
+                                        <th class="border px-4 py-2">Dokter</th>
+                                        <th class="border px-4 py-2">Spesialis</th>
+                                        <th class="border px-4 py-2">Total Antrian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($antrianPerDokter as $item)
+                                        <tr>
+                                            <td class="border px-4 py-2">{{ $item->doctor->name }}</td>
+                                            <td class="border px-4 py-2">{{ $item->doctor->specialization }}</td>
+                                            <td class="border px-4 py-2 font-bold">{{ $item->total }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Filter -->
+                @if ($appointments->isEmpty())
+                    <p class="text-gray-500 italic">Belum ada janji temu.</p>
+                @else
+                    <form method="GET" action="{{ route('appointments.index') }}"
+                        class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-3">
+                        <div>
+                            <input type="date" name="date" value="{{ $date }}"
+                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 
+                                          dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 
+                                          focus:ring-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <select name="status"
+                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 
+                                           dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 
+                                           focus:ring-blue-500 sm:text-sm">
+                                <option value="">Semua Status</option>
+                                <option value="menunggu" {{ $status == 'menunggu' ? 'selected' : '' }}>Menunggu
+                                </option>
+                                <option value="dipanggil" {{ $status == 'dipanggil' ? 'selected' : '' }}>Dipanggil
+                                </option>
+                                <option value="selesai" {{ $status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                            </select>
+                        </div>
+                        <div>
+                            <select name="doctor_id"
+                                class="block w-full rounded-md border-gray-300 dark:border-gray-600 
+                                           dark:bg-gray-700 dark:text-gray-100 shadow-sm focus:border-blue-500 
+                                           focus:ring-blue-500 sm:text-sm">
+                                <option value="">Semua Dokter</option>
+                                @foreach ($doctors as $doc)
+                                    <option value="{{ $doc->id }}" {{ $doctorId == $doc->id ? 'selected' : '' }}>
+                                        {{ $doc->name }} ({{ $doc->specialization }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit"
+                                class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                                Filter
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Cetak antrian hari ini -->
+                    <a href="{{ route('appointments.printToday') }}"
+                        class="bg-blue-100 text-blue-600 px-4 py-2 rounded hover:bg-blue-200 inline-block mb-3">
+                        Cetak Antrian Hari Ini
+                    </a>
+                    <!-- Tabel Janji Temu -->
+                    <table class="table-auto w-full border-collapse border border-gray-300 mt-6">
+                        <thead class="bg-gray-100 dark:bg-gray-700">
+                            <tr>
+                                <th class="border px-4 py-2">Pasien</th>
+                                <th class="border px-4 py-2">Dokter</th>
+                                <th class="border px-4 py-2">Spesialisasi</th>
+                                <th class="border px-4 py-2">Hari</th>
+                                <th class="border px-4 py-2">Jam</th>
+                                <th class="border px-4 py-2">Tanggal</th>
+                                <th class="border px-4 py-2">Status</th>
+                                <th class="border px-4 py-2">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($appointments as $appointment)
+                                <tr>
+                                    <td class="border px-4 py-2">{{ $appointment->patient->name ?? '-' }}</td>
+                                    <td class="border px-4 py-2">{{ $appointment->doctor->name ?? '-' }}</td>
+                                    <td class="border px-4 py-2">{{ $appointment->doctor->specialization ?? '-' }}</td>
+                                    <td class="border px-4 py-2">{{ $appointment->schedule->day ?? '-' }}</td>
+                                    <td class="border px-4 py-2">
+                                        {{ $appointment->schedule->start_time ?? '-' }} -
+                                        {{ $appointment->schedule->end_time ?? '-' }}
+                                    </td>
+                                    <td class="border px-4 py-2">{{ $appointment->appointment_date }}</td>
+                                    <td class="border px-4 py-2">
+                                        @if ($appointment->queue)
+                                            @if ($appointment->queue->called == 2)
+                                                <span
+                                                    class="px-2 py-1 rounded text-xs font-semibold bg-green-500 text-white">
+                                                    Sudah Selesai Diperiksa
+                                                </span>
+                                            @elseif ($appointment->queue->called == 1)
+                                                <span
+                                                    class="px-2 py-1 rounded text-xs font-semibold bg-blue-500 text-white">
+                                                    Sedang Dipanggil
+                                                </span>
+                                            @else
+                                                <span
+                                                    class="px-2 py-1 rounded text-xs font-semibold bg-yellow-500 text-white">
+                                                    Sudah Masuk Antrian
+                                                </span>
+                                            @endif
+                                        @else
+                                            <span
+                                                class="px-2 py-1 rounded text-xs font-semibold bg-gray-500 text-white">
+                                                Belum Masuk Antrian
+                                            </span>
+                                        @endif
+                                    </td>
+                                    <td class="border px-4 py-2">
+                                        <a href="{{ route('appointments.edit', $appointment->id) }}"
+                                            class="text-yellow-500 hover:underline">Edit</a>
+                                        <form action="{{ route('appointments.destroy', $appointment->id) }}"
+                                            method="POST" class="inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-500 hover:underline ml-2"
+                                                onclick="return confirm('Yakin ingin menghapus janji temu ini?')">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                        <a href="{{ route('appointments.pdf', $appointment->id) }}"
+                                            class="text-blue-500 hover:underline ml-2">Cetak PDF</a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
+                    <!-- Grafik Chart.js -->
+                    <div class="mt-6">
+                        <canvas id="grafikDokter" width="600" height="400"></canvas>
+                        <canvas id="grafikStatus" width="600" height="400" class="mt-6"></canvas>
+                    </div>
+
+                    <button onclick="exportGabungan()"
+                        class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                        Export Grafik Gabungan ke PDF
+                    </button>
+
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script>
+                        const dokterChart = new Chart(document.getElementById('grafikDokter'), {
+                            type: 'bar',
+                            data: {
+                                labels: {!! json_encode($labels) !!},
+                                datasets: [{
+                                    label: 'Jumlah Janji Temu',
+                                    data: {!! json_encode($data) !!},
+                                    backgroundColor: '#4faaf0'
+                                }]
+                            }
+                        });
+
+                        const statusChart = new Chart(document.getElementById('grafikStatus'), {
+                            type: 'bar',
+                            data: {
+                                labels: {!! json_encode(array_keys($statusCounts->toArray())) !!},
+                                datasets: [{
+                                    label: 'Distribusi Status',
+                                    data: {!! json_encode(array_values($statusCounts->toArray())) !!},
+                                    backgroundColor: '#f4af40'
+                                }]
+                            }
+                        });
+
+                        function exportGabungan() {
+                            const img1 = document.getElementById('grafikDokter').toDataURL('image/png');
+                            const img2 = document.getElementById('grafikStatus').toDataURL('image/png');
+
+                            fetch("{{ route('appointments.exportCombinedChart') }}", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                                    },
+                                    body: JSON.stringify({
+                                        grafikDokter: img1,
+                                        grafikStatus: img2
+                                    })
+                                })
+                                .then(res => res.blob())
+                                .then(blob => {
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = "grafik-gabungan.pdf";
+                                    a.click();
+                                });
+                        }
+                    </script>
+
+                    <!-- Pagination -->
+                    <div class="mt-6">
+                        {{ $appointments->links() }}
+                    </div>
+
+                @endif
+
+            </div>
+        </div>
+    </div>
+</x-app-layout>
